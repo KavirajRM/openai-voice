@@ -3,9 +3,11 @@ import { CopyBlock, dracula } from "react-code-blocks";
 import Lady from "../../assets/Lady.gif";
 import WebRTCComponent from "../WebRCTC/WebRCTC";
 import Send from "../../assets/Send.png";
+import AnimatedText from "../../components/AnimatedText";
 
 const ChatApp = () => {
   const [messages, setMessages] = useState([]);
+  const [userMessageToSend, setUserMessageToSend] = useState(null);
   const [input, setInput] = useState("");
   const [topics, setTopics] = useState([
     {
@@ -19,27 +21,9 @@ const ChatApp = () => {
 
   const sendMessage = () => {
     if (input.trim() !== "") {
-      stopAIResponse(); // Interrupt AI if speaking
-
       setMessages([...messages, { text: input, sender: "user" }]);
+      setUserMessageToSend(input.trim());
       setInput("");
-
-      // Send message to AI as a new conversation prompt
-      if (
-        dataChannelRef.current &&
-        dataChannelRef.current.readyState === "open"
-      ) {
-        console.log("hi");
-        const message = JSON.stringify({
-          type: "conversation.item.create",
-          item: {
-            type: "message",
-            role: "user",
-            content: [{ type: "input_text", text: input }],
-          },
-        });
-        dataChannelRef.current.send(message);
-      }
     }
   };
 
@@ -72,14 +56,14 @@ const ChatApp = () => {
         <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-4">
           {topics.map((topic, index) => (
             <div key={index} className="mb-4">
-              <h2 className="text-lg font-semibold flex text-gray-dark">
+              <h2 className="text-sm font-semibold flex text-gray-dark">
                 {topic.title}
               </h2>
               <div className="mt-1 space-y-1">
                 {topic.subtopics.map((subtopic, subIndex) => (
                   <div
                     key={subIndex}
-                    className="cursor-pointer flex text-gray-800"
+                    className="cursor-pointer flex text-gray-800 text-sm"
                     onClick={() => setInput(subtopic)}
                   >
                     {subtopic}
@@ -124,6 +108,8 @@ const ChatApp = () => {
                     wrapLongLines={true}
                   />
                 </div>
+              ) : msg.sender === "ai" ? ( // Apply AnimatedText only to AI messages
+                <AnimatedText text={msg.text} />
               ) : (
                 msg.text
               )}
@@ -148,7 +134,7 @@ const ChatApp = () => {
           ) : (
             <WebRTCComponent
               onMessageReceive={handleReceivedMessage}
-              setDataChannel={(dc) => (dataChannelRef.current = dc)}
+              messageToSend={userMessageToSend}
             />
           )}
         </div>

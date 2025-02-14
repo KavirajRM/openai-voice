@@ -49,3 +49,7 @@ code {
   content: "|";
   animation: blink 1s step-end infinite;
 }
+
+.message {
+  white-space: pre-wrap; /* Important for preserving whitespace */
+}

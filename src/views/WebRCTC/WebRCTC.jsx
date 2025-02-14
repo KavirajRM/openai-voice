@@ -1,18 +1,22 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Speech from "../../assets/Speech.png";
 
-const WebRTCComponent = ({ onMessageReceive, setDataChannel }) => {
+const WebRTCComponent = ({ onMessageReceive, messageToSend }) => {
   const [status, setStatus] = useState("Not Connected");
   const audioRef = useRef(null);
   let pc = useRef(null);
   let dataChannel = useRef(null);
   let mediaRecorder = useRef(null);
 
+  useEffect(() => {
+    console.log(messageToSend);
+  }, [messageToSend]);
+
   const startCall = async () => {
     setStatus("Connecting...");
 
     try {
-      const EPHEMERAL_KEY = "ek_67adeed3d23c8190bc1ec86e9086a433";
+      const EPHEMERAL_KEY = "ek_67aedce234808190b4f9b5800cc5446c";
 
       pc.current = new RTCPeerConnection();
 
@@ -35,9 +39,6 @@ const WebRTCComponent = ({ onMessageReceive, setDataChannel }) => {
       mediaRecorder.current.start(1000); // Capture audio every second
 
       dataChannel.current = pc.current.createDataChannel("oai-events");
-
-      // ✅ Use setDataChannel to update dataChannelRef in ChatApp
-      setDataChannel(dataChannel.current);
 
       dataChannel.current.addEventListener("open", () => {
         console.log("Data channel open!");
